@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Badminton AI Analyzer 🏸</title>
+  <link rel="stylesheet" href="src/style.css"/>
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">🏸</div>
+      <h1>Badminton AI Analyzer</h1>
+      <p>Upload a player video — AI will analyze shots, movement, posture & give improvement tips</p>
+    </div>
+
+    <!-- API Key Setup -->
+    <div class="card" id="apiSection">
+      <h2>🔑 Step 1: Enter Your Free Gemini API Key</h2>
+      <p class="hint">Get free key from <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a> → Get API Key (No card needed)</p>
+      <div class="input-row">
+        <input type="password" id="apiKeyInput" placeholder="Paste your Gemini API key here..." />
+        <button onclick="saveKey()">Save Key</button>
+      </div>
+      <div id="keyStatus" class="key-status"></div>
+    </div>
+
+    <!-- Upload Section -->
+    <div class="card" id="uploadSection">
+      <h2>📹 Step 2: Upload Badminton Video</h2>
+      <div class="upload-area" id="uploadArea" onclick="document.getElementById('videoInput').click()">
+        <div class="upload-icon">📤</div>
+        <div class="upload-text">Click to upload video</div>
+        <div class="upload-hint">MP4, MOV, AVI supported</div>
+        <input type="file" id="videoInput" accept="video/*" style="display:none" onchange="handleVideo(event)"/>
+      </div>
+      <video id="previewVideo" controls style="display:none; width:100%; border-radius:10px; margin-top:14px;"></video>
+    </div>
+
+    <!-- Analyze Button -->
+    <button class="analyze-btn" id="analyzeBtn" onclick="startAnalysis()" style="display:none">
+      🔍 Analyze Player Performance
+    </button>
+
+    <!-- Progress -->
+    <div class="card" id="progressSection" style="display:none">
+      <h2>⚙️ Analyzing...</h2>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+      <div id="progressMsg" class="progress-msg">Starting...</div>
+    </div>
+
+    <!-- Results -->
+    <div id="resultsSection" style="display:none">
+
+      <!-- Summary Cards -->
+      <div class="stats-grid" id="statsGrid"></div>
+
+      <!-- Shot Distribution -->
+      <div class="card">
+        <h2>📊 Shot Distribution</h2>
+        <div id="shotChart"></div>
+      </div>
+
+      <!-- Footwork -->
+      <div class="card">
+        <h2>👟 Footwork Analysis</h2>
+        <div id="footworkChart"></div>
+      </div>
+
+      <!-- Improvement Tips -->
+      <div class="card tips-card">
+        <h2>💡 AI Improvement Tips</h2>
+        <div id="tipsList"></div>
+      </div>
+
+      <!-- Observations -->
+      <div class="card obs-card">
+        <h2>🔍 Key Observations</h2>
+        <div id="obsList"></div>
+      </div>
+
+      <!-- Frame Timeline -->
+      <div class="card">
+        <h2>⏱️ Frame-by-Frame Timeline</h2>
+        <div id="timeline"></div>
+      </div>
+
+      <button class="analyze-btn" onclick="resetApp()" style="background:linear-gradient(90deg,#334155,#475569); margin-top:10px;">
+        🔄 Analyze Another Video
+      </button>
+    </div>
+
+    <canvas id="hiddenCanvas" style="display:none"></canvas>
+  </div>
+
+  <script src="src/app.js"></script>
+</body>
+</html>
