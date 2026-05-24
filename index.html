@@ -4,96 +4,262 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Badminton AI Analyzer 🏸</title>
-  <link rel="stylesheet" href="src/style.css"/>
+  <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1a2744 100%); min-height: 100vh; color: #f1f5f9; padding: 20px; }
+#app { max-width: 750px; margin: 0 auto; }
+.header { text-align: center; margin-bottom: 28px; padding-top: 10px; }
+.logo { font-size: 52px; margin-bottom: 8px; }
+.header h1 { font-size: 28px; font-weight: 800; background: linear-gradient(90deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 6px; }
+.header p { color: #94a3b8; font-size: 13px; }
+.card { background: #1e293b; border-radius: 14px; padding: 20px; margin-bottom: 16px; border: 1px solid #334155; }
+.card h2 { font-size: 15px; margin-bottom: 12px; color: #e2e8f0; }
+.hint { font-size: 12px; color: #64748b; margin-bottom: 10px; }
+.hint a { color: #38bdf8; }
+.input-row { display: flex; gap: 10px; }
+.input-row input { flex: 1; background: #0f172a; border: 1px solid #475569; border-radius: 8px; color: #f1f5f9; padding: 10px 14px; font-size: 13px; }
+.input-row button { background: #3b82f6; border: none; color: white; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 13px; }
+.key-status { margin-top: 10px; font-size: 12px; }
+.key-status.ok { color: #22c55e; } .key-status.err { color: #ef4444; }
+.upload-area { border: 2px dashed #334155; border-radius: 12px; padding: 36px 20px; text-align: center; cursor: pointer; transition: border-color 0.2s; }
+.upload-area:hover { border-color: #3b82f6; }
+.upload-icon { font-size: 40px; margin-bottom: 10px; }
+.upload-text { font-size: 15px; font-weight: 600; }
+.upload-hint { font-size: 11px; color: #64748b; margin-top: 4px; }
+.analyze-btn { width: 100%; padding: 15px; border-radius: 12px; border: none; background: linear-gradient(90deg, #3b82f6, #6366f1); color: white; font-size: 16px; font-weight: 700; cursor: pointer; margin-bottom: 16px; }
+.progress-bar-bg { background: #0f172a; border-radius: 100px; height: 12px; overflow: hidden; margin-bottom: 10px; }
+.progress-bar-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #6366f1); border-radius: 100px; width: 0%; transition: width 0.4s; }
+.progress-msg { font-size: 12px; color: #94a3b8; text-align: center; }
+.stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
+.stat-card { background: #1e293b; border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #334155; }
+.stat-icon { font-size: 28px; } .stat-value { font-size: 20px; font-weight: 800; margin: 6px 0 2px; text-transform: capitalize; } .stat-label { font-size: 10px; color: #64748b; }
+.bar-row { margin-bottom: 10px; }
+.bar-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; text-transform: capitalize; }
+.bar-label span:last-child { color: #94a3b8; }
+.bar-bg { background: #0f172a; border-radius: 100px; height: 8px; }
+.bar-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #818cf8); border-radius: 100px; }
+.tips-card { border-color: #22c55e44 !important; } .obs-card { border-color: #f59e0b44 !important; }
+.tip-item { display: flex; gap: 8px; margin-bottom: 8px; font-size: 13px; line-height: 1.5; }
+.timeline-row { background: #0f172a; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.tl-time { font-size: 11px; color: #64748b; min-width: 45px; } .tl-shot { font-size: 11px; background: #1e3a5f; padding: 2px 10px; border-radius: 20px; color: #93c5fd; text-transform: capitalize; } .tl-posture { font-size: 11px; } .tl-foot { font-size: 11px; text-transform: capitalize; }
+.error-box { background: #450a0a; border: 1px solid #ef4444; border-radius: 12px; padding: 14px; margin-bottom: 16px; font-size: 13px; color: #fca5a5; }
+  </style>
 </head>
 <body>
-  <div id="app">
-    <!-- Header -->
-    <div class="header">
-      <div class="logo">🏸</div>
-      <h1>Badminton AI Analyzer</h1>
-      <p>Upload a player video — AI will analyze shots, movement, posture & give improvement tips</p>
-    </div>
-
-    <!-- API Key Setup -->
-    <div class="card" id="apiSection">
-      <h2>🔑 Step 1: Enter Your Free Gemini API Key</h2>
-      <p class="hint">Get free key from <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a> → Get API Key (No card needed)</p>
-      <div class="input-row">
-        <input type="password" id="apiKeyInput" placeholder="Paste your Gemini API key here..." />
-        <button onclick="saveKey()">Save Key</button>
-      </div>
-      <div id="keyStatus" class="key-status"></div>
-    </div>
-
-    <!-- Upload Section -->
-    <div class="card" id="uploadSection">
-      <h2>📹 Step 2: Upload Badminton Video</h2>
-      <div class="upload-area" id="uploadArea" onclick="document.getElementById('videoInput').click()">
-        <div class="upload-icon">📤</div>
-        <div class="upload-text">Click to upload video</div>
-        <div class="upload-hint">MP4, MOV, AVI supported</div>
-        <input type="file" id="videoInput" accept="video/*" style="display:none" onchange="handleVideo(event)"/>
-      </div>
-      <video id="previewVideo" controls style="display:none; width:100%; border-radius:10px; margin-top:14px;"></video>
-    </div>
-
-    <!-- Analyze Button -->
-    <button class="analyze-btn" id="analyzeBtn" onclick="startAnalysis()" style="display:none">
-      🔍 Analyze Player Performance
-    </button>
-
-    <!-- Progress -->
-    <div class="card" id="progressSection" style="display:none">
-      <h2>⚙️ Analyzing...</h2>
-      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
-      <div id="progressMsg" class="progress-msg">Starting...</div>
-    </div>
-
-    <!-- Results -->
-    <div id="resultsSection" style="display:none">
-
-      <!-- Summary Cards -->
-      <div class="stats-grid" id="statsGrid"></div>
-
-      <!-- Shot Distribution -->
-      <div class="card">
-        <h2>📊 Shot Distribution</h2>
-        <div id="shotChart"></div>
-      </div>
-
-      <!-- Footwork -->
-      <div class="card">
-        <h2>👟 Footwork Analysis</h2>
-        <div id="footworkChart"></div>
-      </div>
-
-      <!-- Improvement Tips -->
-      <div class="card tips-card">
-        <h2>💡 AI Improvement Tips</h2>
-        <div id="tipsList"></div>
-      </div>
-
-      <!-- Observations -->
-      <div class="card obs-card">
-        <h2>🔍 Key Observations</h2>
-        <div id="obsList"></div>
-      </div>
-
-      <!-- Frame Timeline -->
-      <div class="card">
-        <h2>⏱️ Frame-by-Frame Timeline</h2>
-        <div id="timeline"></div>
-      </div>
-
-      <button class="analyze-btn" onclick="resetApp()" style="background:linear-gradient(90deg,#334155,#475569); margin-top:10px;">
-        🔄 Analyze Another Video
-      </button>
-    </div>
-
-    <canvas id="hiddenCanvas" style="display:none"></canvas>
+<div id="app">
+  <div class="header">
+    <div class="logo">🏸</div>
+    <h1>Badminton AI Analyzer</h1>
+    <p>Upload a player video — AI will analyze shots, movement, posture & give improvement tips</p>
   </div>
+  <div class="card">
+    <h2>🔑 Step 1: Enter Your Free Gemini API Key</h2>
+    <p class="hint">Get free key from <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a> → Get API Key (No card needed)</p>
+    <div class="input-row">
+      <input type="password" id="apiKeyInput" placeholder="Paste your Gemini API key here..." />
+      <button id="saveKeyBtn">Save Key</button>
+    </div>
+    <div id="keyStatus" class="key-status"></div>
+  </div>
+  <div class="card">
+    <h2>📹 Step 2: Upload Badminton Video</h2>
+    <div class="upload-area" id="uploadArea">
+      <div class="upload-icon">📤</div>
+      <div class="upload-text" id="uploadText">Click to upload video</div>
+      <div class="upload-hint">MP4, MOV, AVI supported</div>
+      <input type="file" id="videoInput" accept="video/*" style="display:none"/>
+    </div>
+    <video id="previewVideo" controls style="display:none; width:100%; border-radius:10px; margin-top:14px;"></video>
+  </div>
+  <button class="analyze-btn" id="analyzeBtn" style="display:none">🔍 Analyze Player Performance</button>
+  <div class="card" id="progressSection" style="display:none">
+    <h2>⚙️ Analyzing...</h2>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+    <div id="progressMsg" class="progress-msg">Starting...</div>
+  </div>
+  <div id="errorBox" class="error-box" style="display:none"></div>
+  <div id="resultsSection" style="display:none">
+    <div class="stats-grid" id="statsGrid"></div>
+    <div class="card"><h2>📊 Shot Distribution</h2><div id="shotChart"></div></div>
+    <div class="card"><h2>👟 Footwork Analysis</h2><div id="footworkChart"></div></div>
+    <div class="card tips-card"><h2>💡 AI Improvement Tips</h2><div id="tipsList"></div></div>
+    <div class="card obs-card"><h2>🔍 Key Observations</h2><div id="obsList"></div></div>
+    <div class="card"><h2>⏱️ Frame-by-Frame Timeline</h2><div id="timeline"></div></div>
+    <button class="analyze-btn" id="resetBtn" style="background:linear-gradient(90deg,#334155,#475569)">🔄 Analyze Another Video</button>
+  </div>
+  <canvas id="hiddenCanvas" style="display:none"></canvas>
+</div>
+<script>
+(function() {
+  var apiKey = localStorage.getItem('gemini_key') || '';
+  var videoFile = null;
 
-  <script src="src/app.js"></script>
+  // Wire up buttons after DOM ready
+  document.getElementById('saveKeyBtn').addEventListener('click', saveKey);
+  document.getElementById('uploadArea').addEventListener('click', function() { document.getElementById('videoInput').click(); });
+  document.getElementById('videoInput').addEventListener('change', handleVideo);
+  document.getElementById('analyzeBtn').addEventListener('click', startAnalysis);
+  document.getElementById('resetBtn').addEventListener('click', resetApp);
+
+  if (apiKey) {
+    document.getElementById('apiKeyInput').value = apiKey;
+    setKeyStatus('✅ Key loaded!', 'ok');
+  }
+
+  function saveKey() {
+    var val = document.getElementById('apiKeyInput').value.trim();
+    if (!val) { setKeyStatus('❌ Key empty hai!', 'err'); return; }
+    apiKey = val;
+    localStorage.setItem('gemini_key', val);
+    setKeyStatus('✅ Key saved! Ab video upload karo.', 'ok');
+  }
+
+  function setKeyStatus(msg, type) {
+    var el = document.getElementById('keyStatus');
+    el.textContent = msg;
+    el.className = 'key-status ' + type;
+  }
+
+  function handleVideo(e) {
+    videoFile = e.target.files[0];
+    if (!videoFile) return;
+    var url = URL.createObjectURL(videoFile);
+    var preview = document.getElementById('previewVideo');
+    preview.src = url; preview.style.display = 'block';
+    document.getElementById('uploadText').textContent = '✅ ' + videoFile.name;
+    document.getElementById('analyzeBtn').style.display = 'block';
+  }
+
+  function extractFrames(video, canvas) {
+    return new Promise(function(resolve) {
+      var frames = [], ctx = canvas.getContext('2d');
+      canvas.width = 640; canvas.height = 360;
+      var duration = video.duration, times = [];
+      for (var t = 1; t < duration; t += 2) times.push(parseFloat(t.toFixed(1)));
+      var selected = times.length > 8 ? times.filter(function(_, i) { return i % Math.ceil(times.length / 8) === 0; }).slice(0, 8) : times;
+      if (selected.length === 0) selected.push(1);
+      var idx = 0;
+      function next() { if (idx >= selected.length) { resolve(frames); return; } video.currentTime = selected[idx]; }
+      video.onseeked = function() {
+        ctx.drawImage(video, 0, 0, 640, 360);
+        frames.push({ time: selected[idx], dataUrl: canvas.toDataURL('image/jpeg', 0.75) });
+        idx++; next();
+      };
+      next();
+    });
+  }
+
+  async function analyzeFrame(base64data) {
+    var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + apiKey;
+    var prompt = 'You are an expert badminton coach. Analyze this badminton video frame.\nReply ONLY with raw JSON (no markdown, no backticks, no explanation):\n{"player_detected":true,"shot_type":"smash|drop|clear|drive|serve|net_shot|lob|unknown","posture_score":7,"footwork_quality":"excellent|good|average|poor","court_position":"front|mid|back|unknown","observations":["obs1","obs2"],"improvement_tips":["tip1","tip2"]}\nIf no player visible set player_detected to false.';
+    var res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: 'image/jpeg', data: base64data } }] }], generationConfig: { temperature: 0.1, maxOutputTokens: 500 } })
+    });
+    if (!res.ok) { var err = await res.json(); throw new Error(err.error?.message || 'API Error'); }
+    var data = await res.json();
+    var text = (data.candidates?.[0]?.content?.parts?.[0]?.text || '{}').replace(/```json|```/g, '').trim();
+    try { return JSON.parse(text); } catch { return { player_detected: false }; }
+  }
+
+  async function startAnalysis() {
+    if (!apiKey) { showError('Pehle API key daalo!'); return; }
+    if (!videoFile) { showError('Pehle video upload karo!'); return; }
+    document.getElementById('analyzeBtn').style.display = 'none';
+    document.getElementById('resultsSection').style.display = 'none';
+    document.getElementById('progressSection').style.display = 'block';
+    clearError();
+    var canvas = document.getElementById('hiddenCanvas');
+    var video = document.createElement('video');
+    video.src = URL.createObjectURL(videoFile);
+    try {
+      setProgress(5, 'Video load ho raha hai...');
+      await new Promise(function(r) { video.onloadedmetadata = r; video.load(); });
+      setProgress(15, 'Frames extract ho rahe hain...');
+      var frames = await extractFrames(video, canvas);
+      var frameResults = [];
+      for (var i = 0; i < frames.length; i++) {
+        setProgress(15 + Math.round(((i+1)/frames.length)*80), 'Frame '+(i+1)+' of '+frames.length+' analyze ho raha hai...');
+        try {
+          var r = await analyzeFrame(frames[i].dataUrl.split(',')[1]);
+          frameResults.push(Object.assign({ time: frames[i].time }, r));
+        } catch(e) {
+          if (e.message.includes('quota') || e.message.includes('RESOURCE_EXHAUSTED')) showError('⚠️ Free limit hit! Kal try karo ya naya Google account se key banao.');
+          frameResults.push({ time: frames[i].time, player_detected: false });
+        }
+      }
+      setProgress(100, 'Analysis complete! ✅');
+      buildResults(frameResults);
+    } catch(e) {
+      showError('Error: ' + e.message);
+      document.getElementById('analyzeBtn').style.display = 'block';
+    } finally {
+      document.getElementById('progressSection').style.display = 'none';
+    }
+  }
+
+  function buildResults(frames) {
+    var valid = frames.filter(function(f) { return f.player_detected !== false; });
+    var shotC = {}, fwC = {}, totalP = 0, tips = [], obs = [];
+    valid.forEach(function(f) {
+      if (f.shot_type && f.shot_type !== 'unknown') shotC[f.shot_type] = (shotC[f.shot_type]||0)+1;
+      if (f.footwork_quality) fwC[f.footwork_quality] = (fwC[f.footwork_quality]||0)+1;
+      if (f.posture_score) totalP += Number(f.posture_score);
+      (f.improvement_tips||[]).forEach(function(t){if(!tips.includes(t))tips.push(t);});
+      (f.observations||[]).forEach(function(o){if(!obs.includes(o))obs.push(o);});
+    });
+    var avgP = valid.length ? (totalP/valid.length).toFixed(1) : 0;
+    var domShot = Object.entries(shotC).sort(function(a,b){return b[1]-a[1];})[0]?.[0]||'N/A';
+    var domFw = Object.entries(fwC).sort(function(a,b){return b[1]-a[1];})[0]?.[0]||'N/A';
+    renderCards(avgP, domShot, domFw, frames.length);
+    renderBar('shotChart', shotC, valid.length);
+    renderBar('footworkChart', fwC, valid.length);
+    renderList('tipsList', tips.slice(0,6), '#22c55e', '✓');
+    renderList('obsList', obs.slice(0,6), '#f59e0b', '•');
+    renderTimeline(valid);
+    document.getElementById('resultsSection').style.display = 'block';
+    document.getElementById('resultsSection').scrollIntoView({ behavior:'smooth' });
+  }
+
+  function sc(s) { return Number(s)>=8?'#22c55e':Number(s)>=5?'#f59e0b':'#ef4444'; }
+  function fc(f) { return {excellent:'#22c55e',good:'#3b82f6',average:'#f59e0b',poor:'#ef4444'}[f]||'#94a3b8'; }
+
+  function renderCards(avgP, shot, fw, total) {
+    var cards = [{icon:'🎞️',value:total,label:'Frames Analyzed',color:'#3b82f6'},{icon:'🧍',value:avgP+'/10',label:'Avg Posture Score',color:sc(avgP)},{icon:'🏸',value:shot.replace(/_/g,' '),label:'Dominant Shot',color:'#818cf8'},{icon:'👟',value:fw,label:'Footwork Quality',color:fc(fw)}];
+    document.getElementById('statsGrid').innerHTML = cards.map(function(c){return '<div class="stat-card" style="border-color:'+c.color+'44"><div class="stat-icon">'+c.icon+'</div><div class="stat-value" style="color:'+c.color+'">'+c.value+'</div><div class="stat-label">'+c.label+'</div></div>';}).join('');
+  }
+
+  function renderBar(id, counts, total) {
+    var sorted = Object.entries(counts).sort(function(a,b){return b[1]-a[1];});
+    if (!sorted.length) { document.getElementById(id).innerHTML='<p style="color:#64748b;font-size:13px">No data</p>'; return; }
+    document.getElementById(id).innerHTML = sorted.map(function(e){var p=Math.round((e[1]/total)*100);return '<div class="bar-row"><div class="bar-label"><span>'+e[0].replace(/_/g,' ')+'</span><span>'+p+'% ('+e[1]+'x)</span></div><div class="bar-bg"><div class="bar-fill" style="width:'+p+'%"></div></div></div>';}).join('');
+  }
+
+  function renderList(id, items, color, icon) {
+    document.getElementById(id).innerHTML = items.length ? items.map(function(t){return '<div class="tip-item"><span style="color:'+color+';flex-shrink:0">'+icon+'</span><span>'+t+'</span></div>';}).join('') : '<p style="color:#64748b;font-size:13px">No data</p>';
+  }
+
+  function renderTimeline(frames) {
+    document.getElementById('timeline').innerHTML = frames.map(function(f){return '<div class="timeline-row"><span class="tl-time">@'+Number(f.time).toFixed(1)+'s</span><span class="tl-shot">'+((f.shot_type||'unknown').replace(/_/g,' '))+'</span><span class="tl-posture" style="color:'+sc(f.posture_score)+'">Posture: '+(f.posture_score||'?')+'/10</span><span class="tl-foot" style="color:'+fc(f.footwork_quality)+'">'+(f.footwork_quality||'?')+'</span></div>';}).join('');
+  }
+
+  function setProgress(pct, msg) { document.getElementById('progressFill').style.width=pct+'%'; document.getElementById('progressMsg').textContent=msg; }
+  function showError(msg) { var el=document.getElementById('errorBox'); el.textContent=msg; el.style.display='block'; }
+  function clearError() { document.getElementById('errorBox').style.display='none'; }
+
+  function resetApp() {
+    videoFile=null;
+    document.getElementById('previewVideo').style.display='none';
+    document.getElementById('previewVideo').src='';
+    document.getElementById('uploadText').textContent='Click to upload video';
+    document.getElementById('analyzeBtn').style.display='none';
+    document.getElementById('resultsSection').style.display='none';
+    document.getElementById('videoInput').value='';
+    clearError();
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+})();
+</script>
 </body>
 </html>
