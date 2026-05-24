@@ -150,7 +150,7 @@ body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, 
   }
 
   async function analyzeFrame(base64data) {
-    var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + apiKey;
+    var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + apiKey;
     var prompt = 'You are an expert badminton coach. Analyze this badminton video frame.\nReply ONLY with raw JSON (no markdown, no backticks, no explanation):\n{"player_detected":true,"shot_type":"smash|drop|clear|drive|serve|net_shot|lob|unknown","posture_score":7,"footwork_quality":"excellent|good|average|poor","court_position":"front|mid|back|unknown","observations":["obs1","obs2"],"improvement_tips":["tip1","tip2"]}\nIf no player visible set player_detected to false.';
     var res = await fetch(url, {
       method: 'POST',
